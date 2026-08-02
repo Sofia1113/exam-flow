@@ -54,12 +54,15 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "凭 refresh 令牌换发新 access 令牌")
+    @Operation(summary = "凭 refresh 令牌换发新 access + refresh(轮换)")
+    @AuditLog(module = "auth", action = "刷新令牌")
     public Result<TokenService.TokenPair> refresh(@RequestBody RefreshReq req) {
         Claims claims = tokenService.verify(req.refreshToken(), JwtUtil.TOKEN_TYPE_REFRESH);
         Long userId = Long.valueOf(claims.getSubject());
         String username = claims.get("username", String.class);
-        // TODO: 轮换策略 —— 如需 refresh 也轮换,在此撤销旧 refresh 并签发新 refresh
+        // 安全实践:refresh 令牌轮换 —— 每次使用即撤销旧令牌并签发新对,
+        // 被盗令牌一旦被使用即失效,且可据黑名单检测重放(TDD §7.1)
+        tokenService.revoke(req.refreshToken());
         return Result.ok(tokenService.issue(userId, username));
     }
 
