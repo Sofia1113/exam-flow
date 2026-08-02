@@ -233,6 +233,25 @@ public class RegistrationService {
         return slot.getId();
     }
 
+    /** 当前用户的报名列表(含计划信息,考生门户"我的考试")。 */
+    public List<Map<String, Object>> myRegistrations(Long userId) {
+        List<ExamRegistration> regs = registrationMapper.selectList(Wrappers.lambdaQuery(ExamRegistration.class)
+                .eq(ExamRegistration::getUserId, userId).orderByDesc(ExamRegistration::getId));
+        return regs.stream().map(reg -> {
+            ExamPlan plan = planMapper.selectById(reg.getPlanId());
+            Map<String, Object> row = new java.util.HashMap<>();
+            row.put("registrationId", reg.getId());
+            row.put("planId", reg.getPlanId());
+            row.put("planName", plan == null ? null : plan.getName());
+            row.put("examDate", plan == null ? null : plan.getExamDate());
+            row.put("status", reg.getStatus());
+            row.put("ticketNo", reg.getTicketNo());
+            row.put("seatNo", reg.getSeatNo());
+            row.put("createTime", reg.getCreateTime());
+            return row;
+        }).toList();
+    }
+
     // ---------- 名单与导出(FR-REG-04) ----------
 
     public PageResult<Map<String, Object>> registrations(long page, long size, Long planId, String status) {

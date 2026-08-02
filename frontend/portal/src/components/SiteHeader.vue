@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 /**
  * 门户头部:深藏青通栏(36px)+ 白色主导航(64px,当前项红底白字)。
  * 依据 DESIGN.md §Components 顶部结构。
  */
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+
+function logout() {
+  auth.logout()
+  router.push('/')
+}
 
 const navItems = [
   { path: '/', label: '首页' },
@@ -25,7 +33,14 @@ const today = computed(() => new Date().toLocaleDateString('zh-CN'))
     <div class="ef-top-rail">
       <div class="ef-container">
         <span>国家考试信息网</span>
-        <span class="ef-top-rail-right">{{ today }}</span>
+        <span class="ef-top-rail-right">
+          {{ today }}
+          <template v-if="auth.isLoggedIn">
+            <span style="margin-left: 16px">{{ auth.username }}</span>
+            <a href="#" style="margin-left: 12px" @click.prevent="logout">退出</a>
+          </template>
+          <router-link v-else to="/login" style="margin-left: 16px">登录</router-link>
+        </span>
       </div>
     </div>
     <nav class="ef-nav">

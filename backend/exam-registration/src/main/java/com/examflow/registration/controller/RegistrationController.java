@@ -92,6 +92,13 @@ public class RegistrationController {
         return Result.ok();
     }
 
+    @GetMapping("/my")
+    @Operation(summary = "我的报名列表(考生门户)")
+    public Result<List<Map<String, Object>>> myRegistrations() {
+        return Result.ok(registrationService.myRegistrations(
+                com.examflow.common.context.UserContext.requireUserId()));
+    }
+
     @GetMapping("/plans/{planId}/registrations")
     @Operation(summary = "报名名单(分页)")
     public Result<PageResult<Map<String, Object>>> registrations(
