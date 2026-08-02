@@ -13,6 +13,7 @@ const router = createRouter({
     { path: '/questions', name: 'questions', component: () => import('../views/QuestionsView.vue'), meta: { title: '题库管理' } },
     { path: '/papers', name: 'papers', component: () => import('../views/PapersView.vue'), meta: { title: '试卷管理' } },
     { path: '/exams', name: 'exams', component: () => import('../views/ExamsView.vue'), meta: { title: '考试管理' } },
+    { path: '/grading', name: 'grading', component: () => import('../views/GradingView.vue'), meta: { title: '阅卷管理' } },
     { path: '/scores', name: 'scores', component: () => import('../views/ScoresView.vue'), meta: { title: '成绩管理' } }
   ]
 })

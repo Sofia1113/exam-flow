@@ -20,6 +20,7 @@ const menus = [
   { path: '/questions', label: '题库管理' },
   { path: '/papers', label: '试卷管理' },
   { path: '/exams', label: '考试管理' },
+  { path: '/grading', label: '阅卷管理' },
   { path: '/scores', label: '成绩管理' }
 ]
 
