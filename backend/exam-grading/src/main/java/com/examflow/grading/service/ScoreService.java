@@ -228,14 +228,32 @@ public class ScoreService {
         if (pass && correction.getToValue() != null) {
             ScoreRecord record = scoreRecordMapper.selectById(correction.getScoreId());
             if (record != null) {
+                BigDecimal passScore = passScoreOf(record.getSessionId());
                 record.setTotalScore(correction.getToValue());
-                record.setPassFlag(record.getTotalScore().compareTo(record.getTotalScore()) >= 0 ? 1 : 0);
+                // 及格判定按试卷快照及格线,修复恒为合格的逻辑缺陷
+                record.setPassFlag(passScore != null
+                        && correction.getToValue().compareTo(passScore) >= 0 ? 1 : 0);
                 scoreRecordMapper.updateById(record);
-                log.info("成绩更正生效: score={}, {} → {}, 原因={}, 审批人={}",
+                log.info("成绩更正生效: score={}, {} → {}, 及格={}, 原因={}, 审批人={}",
                         record.getId(), correction.getFromValue(), correction.getToValue(),
-                        correction.getReason(), approverId);
+                        record.getPassFlag(), correction.getReason(), approverId);
             }
         }
+    }
+
+    /** 试卷快照及格线(更正后重新判定合格)。 */
+    private BigDecimal passScoreOf(Long sessionId) {
+        ExamSessionView session = sessionMapper.selectById(sessionId);
+        if (session == null) {
+            return null;
+        }
+        try {
+            return paperClient.examSnapshot(session.getPaperSnapshotId(), false).passScore();
+        } catch (Exception e) {
+            log.warn("获取及格线失败: session={}", sessionId, e);
+            return null;
+        }
+    }
     }
 
     /** 成绩导出(按考次,加密 Excel 待 M5 落地,当前普通导出)。 */
