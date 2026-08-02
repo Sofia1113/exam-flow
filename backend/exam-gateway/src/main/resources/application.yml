@@ -11,22 +11,78 @@ spring:
   application:
     name: exam-gateway
   cloud:
-    gateway:
-      routes:
-        # 骨架:静态转发示例;生产环境配合 Nacos 注册中心使用 lb://exam-auth 负载均衡
-        - id: exam-auth
-          uri: http://127.0.0.1:8081
-          predicates:
-            - Path=/api/v1/auth/**
-        - id: exam-exam
-          uri: http://127.0.0.1:8086
-          predicates:
-            - Path=/api/v1/exam/**,/api/v1/proctor/**
-
+    # Nacos 注册中心:本地默认关闭;生产启用时改为 enabled: true 并配置 server-addr,
+    # 路由 uri 同步改为 lb://服务名
     nacos:
       discovery:
         enabled: false
         server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+    gateway:
+      # 服务地址参数化:本地默认直连各服务端口;
+      # 生产环境取消下方 Nacos 配置后,将 uri 改为 lb://服务名(如 lb://exam-auth)自动负载均衡
+      routes:
+        - id: exam-auth
+          uri: ${SERVICE_AUTH_URI:http://127.0.0.1:8081}
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: exam-user
+          uri: ${SERVICE_USER_URI:http://127.0.0.1:8082}
+          predicates:
+            - Path=/api/v1/users/**,/api/v1/orgs/**
+        - id: exam-question
+          uri: ${SERVICE_QUESTION_URI:http://127.0.0.1:8083}
+          predicates:
+            - Path=/api/v1/questions/**
+        - id: exam-paper
+          uri: ${SERVICE_PAPER_URI:http://127.0.0.1:8084}
+          predicates:
+            - Path=/api/v1/papers/**
+        - id: exam-registration
+          uri: ${SERVICE_REGISTRATION_URI:http://127.0.0.1:8085}
+          predicates:
+            - Path=/api/v1/registration/**
+        # 考试服务:核心链路(保存/交卷/心跳),生产建议独立路由组并放大超时
+        - id: exam-service
+          uri: ${SERVICE_EXAM_URI:http://127.0.0.1:8086}
+          predicates:
+            - Path=/api/v1/exam/**
+        - id: exam-proctor
+          uri: ${SERVICE_PROCTOR_URI:http://127.0.0.1:8087}
+          predicates:
+            - Path=/api/v1/proctor/**
+        - id: exam-grading
+          uri: ${SERVICE_GRADING_URI:http://127.0.0.1:8088}
+          predicates:
+            - Path=/api/v1/grading/**
+        - id: exam-report
+          uri: ${SERVICE_REPORT_URI:http://127.0.0.1:8089}
+          predicates:
+            - Path=/api/v1/reports/**
+        - id: exam-message
+          uri: ${SERVICE_MESSAGE_URI:http://127.0.0.1:8090}
+          predicates:
+            - Path=/api/v1/messages/**
+        - id: exam-sys
+          uri: ${SERVICE_SYS_URI:http://127.0.0.1:8091}
+          predicates:
+            - Path=/api/v1/sys/**
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            # 生产环境必须收紧为实际站点域名列表
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 30s
+      # 等保基础安全响应头(TDD §7.6)
+      default-filters:
+        - AddResponseHeader=X-Content-Type-Options, nosniff
+        - AddResponseHeader=X-Frame-Options, DENY
+        - AddResponseHeader=Cache-Control, no-store
 
 logging:
   level:
