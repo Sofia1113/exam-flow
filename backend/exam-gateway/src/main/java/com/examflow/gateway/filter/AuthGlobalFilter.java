@@ -1,6 +1,8 @@
 package com.examflow.gateway.filter;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -12,12 +14,20 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * 网关鉴权过滤器(骨架)。
- * - 白名单路径直接放行(登录、验证码等);
- * - 其余请求校验 Authorization: Bearer <token>;
- * - 生产化 TODO:调用 auth-service 校验 JWT 并解析用户信息写入请求头(X-User-Id 等);
- *   考试相关接口(保存/交卷/心跳)叠加防重放校验(timestamp+nonce+sign,见 TDD §5.3)。
+ * 网关鉴权过滤器。
+ *
+ * <p>安全基线(fail-closed):JWT 签名校验实现完成之前,非白名单请求一律拒绝,
+ * 禁止"仅检查令牌格式后放行" —— 那等同于认证绕过。
+ *
+ * <ul>
+ *   <li>白名单路径(登录/验证码/健康检查/接口文档)直接放行;</li>
+ *   <li>其余请求校验 Authorization: Bearer &lt;token&gt;,并在校验通过后
+ *       透传用户上下文(X-User-Id 等请求头)供下游资源归属校验;</li>
+ *   <li>{@code examflow.security.auth-enabled=false} 仅用于本地联调显式关闭,
+ *       严禁在生产开启。</li>
+ * </ul>
  */
+@Slf4j
 @Component
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
@@ -34,10 +44,18 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             "/swagger-ui/**"
     );
 
+    /** 鉴权开关:默认开启(fail-closed);仅本地联调可显式关闭。 */
+    @Value("${examflow.security.auth-enabled:true}")
+    private boolean authEnabled;
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
         if (WHITE_LIST.stream().anyMatch(p -> PATH_MATCHER.match(p, path))) {
+            return chain.filter(exchange);
+        }
+        if (!authEnabled) {
+            log.warn("网关鉴权已关闭(auth-enabled=false),仅限本地联调,严禁用于生产");
             return chain.filter(exchange);
         }
 
@@ -45,8 +63,10 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         if (auth == null || !auth.startsWith(BEARER_PREFIX) || auth.substring(BEARER_PREFIX.length()).isBlank()) {
             return unauthorized(exchange);
         }
-        // TODO: 生产环境在此调用 auth-service 校验令牌并透传用户上下文
-        return chain.filter(exchange);
+        // TODO: 生产化调用 auth-service 校验 JWT(签名/有效期/黑名单),解析用户信息
+        // 写入请求头 X-User-Id / X-User-Roles 供下游服务做资源归属与权限校验。
+        // 在真实校验实现完成前,一律拒绝(fail-closed),不放过任意格式令牌。
+        return unauthorized(exchange);
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {

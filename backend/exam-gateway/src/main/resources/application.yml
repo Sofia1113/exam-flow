@@ -1,6 +1,12 @@
 server:
   port: 8080
 
+# 安全基线:鉴权默认开启(fail-closed,JWT 校验实现前拒绝一切非白名单请求)。
+# 本地联调可临时设 false,严禁用于生产。
+examflow:
+  security:
+    auth-enabled: true
+
 spring:
   application:
     name: exam-gateway

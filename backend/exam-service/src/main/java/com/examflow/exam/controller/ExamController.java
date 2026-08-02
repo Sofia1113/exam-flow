@@ -22,6 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 在线考试接口(核心链路,见 TDD §5.2)。
  * 交卷/保存/心跳为最高优先级接口,网关叠加防重放签名校验。
+ *
+ * <p>安全要求(TDD §7.3,IDOR 防护):本类所有接口必须做资源归属校验 ——
+ * 从网关透传的 X-User-Id 请求头取得当前用户,校验 session/registration 属于该用户,
+ * 否则返回 12001;网关鉴权关闭时仅限本地联调,严禁部署生产。
+ * 在 ExamSessionServiceImpl 实现时同步落地该校验。
  */
 @Slf4j
 @RestController

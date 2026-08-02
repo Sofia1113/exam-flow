@@ -6,14 +6,19 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AES-256-GCM 字段加密(见 TDD §7.2)。
- * 密钥来源:环境变量 EXAMSECRET_KEY(Base64,32 字节);未配置时使用开发默认密钥。
- * 生产环境必须通过环境变量/KMS 注入密钥,并定期轮换。
+ * 密钥来源:环境变量 EXAMSECRET_KEY(Base64,32 字节)。
+ *
+ * <p>安全基线:生产环境未注入 EXAMSECRET_KEY 时,回退内置开发密钥并持续 WARN;
+ * 该密钥为公开固定值,严禁用于生产 —— 部署平台必须通过环境变量/KMS 注入真实密钥。
  */
 public final class AesUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(AesUtil.class);
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int TAG_BITS = 128;
     private static final int NONCE_LEN = 12;
@@ -21,12 +26,18 @@ public final class AesUtil {
     /** 开发默认密钥(仅本地开发使用,生产必须注入 EXAMSECRET_KEY)。 */
     private static final String DEV_KEY_B64 = "RGV2U2VjcmV0S2V5MDEyMzQ1Njc4OWFiY2RlZjEyMzQ1Ng==";
 
+    private static volatile boolean devKeyWarned = false;
+
     private AesUtil() {
     }
 
     private static SecretKeySpec loadKey() {
         String b64 = System.getenv("EXAMSECRET_KEY");
         if (b64 == null || b64.isBlank()) {
+            if (!devKeyWarned) {
+                log.warn("未配置环境变量 EXAMSECRET_KEY,回退内置开发密钥 —— 严禁用于生产环境");
+                devKeyWarned = true;
+            }
             b64 = DEV_KEY_B64;
         }
         byte[] raw = Base64.getDecoder().decode(b64);
