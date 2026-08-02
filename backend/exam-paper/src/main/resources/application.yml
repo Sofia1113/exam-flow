@@ -1,6 +1,10 @@
 server:
   port: 8084
 
+# question-service 地址(生产注册 Nacos 后由服务发现替换)
+examflow:
+  question-service-url: ${QUESTION_SERVICE_URL:http://127.0.0.1:8083}
+
 spring:
   application:
     name: exam-paper
