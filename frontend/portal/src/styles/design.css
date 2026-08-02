@@ -1,0 +1,446 @@
+/* =============================================================
+ * exam-flow 政企风格设计系统(依据 DESIGN.md)
+ * 唯一强调色:政务红 #C7000B;结构色:深藏青 #1F4E79
+ * 直角(≤4px)/1px 细线/黑体标题 + 宋体正文/1200px 版心
+ * 禁止:palette 外色值、大圆角、重投影、emoji、书法体
+ * ============================================================= */
+
+:root {
+  /* colors(DESIGN.md front matter) */
+  --ef-primary: #C7000B;
+  --ef-primary-hover: #A60008;
+  --ef-primary-pressed: #8A0007;
+  --ef-navy: #1F4E79;
+  --ef-gold: #C9A063;
+  --ef-ink: #1A1A1A;
+  --ef-ink-muted: #555555;
+  --ef-ink-subtle: #8C8C8C;
+  --ef-canvas: #FFFFFF;
+  --ef-surface-1: #F5F5F5;
+  --ef-surface-2: #EDEDED;
+  --ef-inverse-ink: #FFFFFF;
+  --ef-inverse-ink-muted: #B8C8D9;
+  --ef-hairline: #E3E3E3;
+  --ef-hairline-strong: #C7000B;
+  --ef-success: #2E8B57;
+  --ef-warning: #C77400;
+  --ef-error: #D93025;
+  --ef-info: #1F4E79;
+
+  /* typography */
+  --ef-font-heiti: 'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --ef-font-songti: 'Noto Serif SC', 'SimSun', serif;
+
+  /* layout */
+  --ef-container: 1200px;
+  --ef-spacing-xxs: 4px;
+  --ef-spacing-xs: 8px;
+  --ef-spacing-sm: 12px;
+  --ef-spacing-md: 16px;
+  --ef-spacing-lg: 24px;
+  --ef-spacing-xl: 32px;
+  --ef-spacing-xxl: 48px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--ef-font-songti);
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: 0.5px;
+  color: var(--ef-ink);
+  background: var(--ef-canvas);
+}
+
+a {
+  color: var(--ef-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--ef-primary-hover);
+}
+
+/* ---------- 布局:1200px 版心居中 ---------- */
+
+.ef-container {
+  max-width: var(--ef-container);
+  margin: 0 auto;
+  padding: 0 var(--ef-spacing-lg);
+}
+
+.ef-main {
+  min-height: calc(100vh - 36px - 64px - 160px);
+  padding: var(--ef-spacing-xl) 0 var(--ef-spacing-xxl);
+}
+
+/* ---------- 顶部通栏(深藏青 36px) ---------- */
+
+.ef-top-rail {
+  height: 36px;
+  background: var(--ef-navy);
+  color: var(--ef-inverse-ink-muted);
+  font-family: var(--ef-font-heiti);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.ef-top-rail .ef-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.ef-top-rail a {
+  color: var(--ef-inverse-ink-muted);
+  margin-left: var(--ef-spacing-md);
+}
+
+.ef-top-rail a:hover {
+  color: var(--ef-inverse-ink);
+}
+
+/* ---------- 主导航(白底 64px,当前项红底白字) ---------- */
+
+.ef-nav {
+  height: 64px;
+  background: var(--ef-canvas);
+  border-bottom: 1px solid var(--ef-hairline);
+  display: flex;
+  align-items: center;
+}
+
+.ef-nav .ef-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.ef-nav-logo {
+  font-family: var(--ef-font-heiti);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ef-ink);
+}
+
+.ef-nav-items {
+  display: flex;
+  gap: var(--ef-spacing-xs);
+}
+
+.ef-nav-item {
+  display: inline-block;
+  padding: 12px 16px;
+  font-family: var(--ef-font-heiti);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--ef-ink);
+}
+
+.ef-nav-item:hover {
+  background: var(--ef-surface-1);
+  color: var(--ef-primary);
+}
+
+.ef-nav-item.is-active {
+  background: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+}
+
+/* ---------- 红色横幅(hero) ---------- */
+
+.ef-banner {
+  background: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+  padding: 64px 0;
+}
+
+.ef-banner h1 {
+  font-family: var(--ef-font-heiti);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: var(--ef-spacing-md);
+}
+
+.ef-banner p {
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+/* ---------- 区块标题:左侧 4px 红竖线 + 黑体标题 ---------- */
+
+.ef-section-title {
+  padding-left: var(--ef-spacing-sm);
+  border-left: 4px solid var(--ef-primary);
+  font-family: var(--ef-font-heiti);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--ef-ink);
+  margin: var(--ef-spacing-xl) 0 var(--ef-spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ---------- 按钮(0px 直角,黑体,字距 1px) ---------- */
+
+.ef-btn {
+  display: inline-block;
+  border: 1px solid var(--ef-primary);
+  border-radius: 0;
+  padding: 12px 32px;
+  font-family: var(--ef-font-heiti);
+  font-size: 16px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: none;
+}
+
+.ef-btn-primary {
+  background: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-btn-primary:hover {
+  background: var(--ef-primary-hover);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-btn-outline {
+  background: var(--ef-canvas);
+  color: var(--ef-primary);
+}
+
+.ef-btn-outline:hover {
+  background: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-btn-plain {
+  background: var(--ef-canvas);
+  color: var(--ef-ink-muted);
+  border-color: transparent;
+}
+
+.ef-btn:disabled {
+  background: var(--ef-surface-2);
+  color: var(--ef-ink-subtle);
+  border-color: var(--ef-hairline);
+  cursor: not-allowed;
+}
+
+/* ---------- 卡片(白底 1px 细线 0px 圆角) ---------- */
+
+.ef-card {
+  background: var(--ef-canvas);
+  border: 1px solid var(--ef-hairline);
+  border-radius: 0;
+  padding: var(--ef-spacing-lg);
+}
+
+.ef-card:hover {
+  background: var(--ef-surface-1);
+  border-color: var(--ef-primary);
+}
+
+.ef-stat-card {
+  background: var(--ef-canvas);
+  border: 1px solid var(--ef-hairline);
+  border-top: 3px solid var(--ef-primary);
+  border-radius: 0;
+  padding: var(--ef-spacing-lg);
+  text-align: center;
+}
+
+.ef-stat-card .ef-stat-number {
+  font-family: var(--ef-font-heiti);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ef-ink);
+}
+
+.ef-stat-card .ef-stat-label {
+  font-size: 14px;
+  color: var(--ef-ink-muted);
+}
+
+/* ---------- 表格(表头浅灰底,细线分隔,无斑马纹) ---------- */
+
+.ef-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ef-table th {
+  background: var(--ef-surface-1);
+  font-family: var(--ef-font-heiti);
+  font-weight: 600;
+  color: var(--ef-ink);
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--ef-hairline);
+}
+
+.ef-table td {
+  padding: 12px 16px;
+  color: var(--ef-ink-muted);
+  border-bottom: 1px solid var(--ef-hairline);
+}
+
+.ef-table tbody tr:hover {
+  background: var(--ef-surface-1);
+}
+
+/* 数字右对齐,中文左对齐 */
+.ef-table td.num,
+.ef-table th.num {
+  text-align: right;
+}
+
+/* ---------- 表单(0px 圆角,聚焦红边框) ---------- */
+
+.ef-input {
+  width: 100%;
+  border: 1px solid var(--ef-hairline);
+  border-radius: 0;
+  padding: 10px 12px;
+  font-family: var(--ef-font-songti);
+  font-size: 16px;
+  color: var(--ef-ink);
+  background: var(--ef-canvas);
+}
+
+.ef-input:focus {
+  outline: none;
+  border-color: var(--ef-primary);
+  box-shadow: 0 0 0 3px rgba(199, 0, 11, 0.1);
+}
+
+.ef-form-label {
+  display: block;
+  margin-bottom: var(--ef-spacing-xs);
+  font-size: 14px;
+  color: var(--ef-ink-muted);
+}
+
+.ef-form-label.required::before {
+  content: '*';
+  color: var(--ef-primary);
+  margin-right: 2px;
+}
+
+/* ---------- 标签与状态 ---------- */
+
+.ef-tag {
+  display: inline-block;
+  border: 1px solid var(--ef-hairline);
+  background: var(--ef-surface-1);
+  font-family: var(--ef-font-heiti);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 0;
+  color: var(--ef-ink-muted);
+}
+
+.ef-tag-primary {
+  background: var(--ef-primary);
+  border-color: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ef-ink-muted);
+}
+
+.ef-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--ef-info);
+}
+
+.ef-status.is-success::before {
+  background: var(--ef-success);
+}
+
+.ef-status.is-warning::before {
+  background: var(--ef-warning);
+}
+
+.ef-status.is-error::before {
+  background: var(--ef-error);
+}
+
+/* ---------- 公告列表 ---------- */
+
+.ef-announce-list {
+  list-style: none;
+}
+
+.ef-announce-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ef-hairline);
+  font-size: 15px;
+}
+
+.ef-announce-list time {
+  color: var(--ef-ink-subtle);
+  font-size: 13px;
+  white-space: nowrap;
+  margin-left: var(--ef-spacing-md);
+}
+
+/* ---------- 页脚(深藏青,含法定备案信息) ---------- */
+
+.ef-footer {
+  background: var(--ef-navy);
+  color: var(--ef-inverse-ink-muted);
+  font-family: var(--ef-font-heiti);
+  font-size: 12px;
+  padding: 48px 0 24px;
+  text-align: center;
+  line-height: 2;
+}
+
+.ef-footer a {
+  color: var(--ef-inverse-ink-muted);
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 768px) {
+  .ef-banner {
+    padding: 32px 0;
+  }
+
+  .ef-banner h1 {
+    font-size: 28px;
+  }
+
+  .ef-top-rail .ef-container {
+    justify-content: center;
+  }
+
+  .ef-top-rail .ef-top-rail-right {
+    display: none;
+  }
+}

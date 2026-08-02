@@ -1,0 +1,257 @@
+/* =============================================================
+ * 管理后台样式:依据 DESIGN.md 政企风格
+ * 布局:深藏青顶栏 + 白色侧边导航(当前项红底白字)+ 内容区
+ * ============================================================= */
+
+:root {
+  --ef-primary: #C7000B;
+  --ef-primary-hover: #A60008;
+  --ef-navy: #1F4E79;
+  --ef-ink: #1A1A1A;
+  --ef-ink-muted: #555555;
+  --ef-ink-subtle: #8C8C8C;
+  --ef-canvas: #FFFFFF;
+  --ef-surface-1: #F5F5F5;
+  --ef-surface-2: #EDEDED;
+  --ef-inverse-ink: #FFFFFF;
+  --ef-inverse-ink-muted: #B8C8D9;
+  --ef-hairline: #E3E3E3;
+  --ef-success: #2E8B57;
+  --ef-warning: #C77400;
+  --ef-error: #D93025;
+  --ef-font-heiti: 'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --ef-font-songti: 'Noto Serif SC', 'SimSun', serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--ef-font-songti);
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: 0.5px;
+  color: var(--ef-ink);
+  background: var(--ef-surface-1);
+}
+
+/* ---------- 布局:顶栏 + 侧边栏 + 内容 ---------- */
+
+.ef-admin-topbar {
+  height: 56px;
+  background: var(--ef-navy);
+  color: var(--ef-inverse-ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.ef-admin-topbar .ef-logo {
+  font-family: var(--ef-font-heiti);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.ef-admin-topbar .ef-user {
+  font-family: var(--ef-font-heiti);
+  font-size: 13px;
+  color: var(--ef-inverse-ink-muted);
+}
+
+.ef-admin-sidebar {
+  position: fixed;
+  top: 56px;
+  bottom: 0;
+  left: 0;
+  width: 200px;
+  background: var(--ef-canvas);
+  border-right: 1px solid var(--ef-hairline);
+  padding-top: 16px;
+}
+
+.ef-admin-sidebar .ef-menu-item {
+  display: block;
+  padding: 12px 24px;
+  font-family: var(--ef-font-heiti);
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--ef-ink);
+  border-left: 3px solid transparent;
+}
+
+.ef-admin-sidebar .ef-menu-item:hover {
+  background: var(--ef-surface-1);
+  color: var(--ef-primary);
+}
+
+.ef-admin-sidebar .ef-menu-item.is-active {
+  background: var(--ef-surface-1);
+  color: var(--ef-primary);
+  border-left-color: var(--ef-primary);
+  font-weight: 700;
+}
+
+.ef-admin-main {
+  margin-left: 200px;
+  margin-top: 56px;
+  padding: 24px 32px;
+}
+
+.ef-page-title {
+  padding-left: 12px;
+  border-left: 4px solid var(--ef-primary);
+  font-family: var(--ef-font-heiti);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--ef-ink);
+  margin-bottom: 20px;
+}
+
+/* ---------- 通用组件(与门户一致) ---------- */
+
+.ef-card {
+  background: var(--ef-canvas);
+  border: 1px solid var(--ef-hairline);
+  border-radius: 0;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.ef-stat-card {
+  background: var(--ef-canvas);
+  border: 1px solid var(--ef-hairline);
+  border-top: 3px solid var(--ef-primary);
+  border-radius: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+.ef-stat-number {
+  font-family: var(--ef-font-heiti);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--ef-ink);
+}
+
+.ef-stat-label {
+  font-size: 14px;
+  color: var(--ef-ink-muted);
+}
+
+.ef-btn {
+  display: inline-block;
+  border: 1px solid var(--ef-primary);
+  border-radius: 0;
+  padding: 10px 24px;
+  font-family: var(--ef-font-heiti);
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  background: var(--ef-canvas);
+  color: var(--ef-primary);
+}
+
+.ef-btn-primary {
+  background: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-btn-primary:hover {
+  background: var(--ef-primary-hover);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-btn-plain {
+  border-color: transparent;
+  color: var(--ef-ink-muted);
+}
+
+.ef-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: var(--ef-canvas);
+}
+
+.ef-table th {
+  background: var(--ef-surface-1);
+  font-family: var(--ef-font-heiti);
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--ef-hairline);
+  color: var(--ef-ink);
+}
+
+.ef-table td {
+  padding: 12px 16px;
+  color: var(--ef-ink-muted);
+  border-bottom: 1px solid var(--ef-hairline);
+}
+
+.ef-table tbody tr:hover {
+  background: var(--ef-surface-1);
+}
+
+.ef-tag {
+  display: inline-block;
+  border: 1px solid var(--ef-hairline);
+  background: var(--ef-surface-1);
+  font-family: var(--ef-font-heiti);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 0;
+  color: var(--ef-ink-muted);
+}
+
+.ef-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ef-ink-muted);
+}
+
+.ef-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--ef-navy);
+}
+
+.ef-status.is-success::before {
+  background: var(--ef-success);
+}
+
+.ef-status.is-warning::before {
+  background: var(--ef-warning);
+}
+
+.ef-status.is-error::before {
+  background: var(--ef-error);
+}
+
+.ef-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+  .ef-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

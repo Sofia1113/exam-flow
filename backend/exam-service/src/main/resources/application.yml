@@ -1,0 +1,40 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: exam-service
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/exam_flow?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+
+# RocketMQ(交卷/保存事件,生产使用主从集群)
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: exam-service-producer
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.examflow: info

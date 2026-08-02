@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: exam-gateway
+  cloud:
+    gateway:
+      routes:
+        # 骨架:静态转发示例;生产环境配合 Nacos 注册中心使用 lb://exam-auth 负载均衡
+        - id: exam-auth
+          uri: http://127.0.0.1:8081
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: exam-exam
+          uri: http://127.0.0.1:8086
+          predicates:
+            - Path=/api/v1/exam/**,/api/v1/proctor/**
+
+    nacos:
+      discovery:
+        enabled: false
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+
+logging:
+  level:
+    com.examflow: info

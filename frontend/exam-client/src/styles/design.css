@@ -1,0 +1,265 @@
+/* =============================================================
+ * 在线考试端样式:依据 DESIGN.md 政企风格
+ * 全屏答题布局(无门户导航/页脚),配色与字族仍遵循规范
+ * ============================================================= */
+
+:root {
+  --ef-primary: #C7000B;
+  --ef-primary-hover: #A60008;
+  --ef-navy: #1F4E79;
+  --ef-ink: #1A1A1A;
+  --ef-ink-muted: #555555;
+  --ef-ink-subtle: #8C8C8C;
+  --ef-canvas: #FFFFFF;
+  --ef-surface-1: #F5F5F5;
+  --ef-surface-2: #EDEDED;
+  --ef-inverse-ink: #FFFFFF;
+  --ef-hairline: #E3E3E3;
+  --ef-success: #2E8B57;
+  --ef-warning: #C77400;
+  --ef-error: #D93025;
+  --ef-font-heiti: 'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --ef-font-songti: 'Noto Serif SC', 'SimSun', serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  font-family: var(--ef-font-songti);
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ef-ink);
+  background: var(--ef-canvas);
+  overflow: hidden; /* 全屏考试,禁止页面滚动溢出 */
+}
+
+/* ---------- 考试顶栏(深藏青) ---------- */
+
+.ef-exam-topbar {
+  height: 56px;
+  background: var(--ef-navy);
+  color: var(--ef-inverse-ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.ef-exam-topbar .ef-exam-title {
+  font-family: var(--ef-font-heiti);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.ef-countdown {
+  font-family: var(--ef-font-heiti);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.ef-countdown.is-warning {
+  color: var(--ef-warning);
+}
+
+/* ---------- 布局:左侧答题卡 + 右侧题目区 ---------- */
+
+.ef-exam-body {
+  display: flex;
+  height: calc(100% - 56px);
+}
+
+.ef-answer-sheet {
+  width: 220px;
+  border-right: 1px solid var(--ef-hairline);
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--ef-surface-1);
+}
+
+.ef-answer-sheet h3 {
+  font-family: var(--ef-font-heiti);
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--ef-ink);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ef-hairline);
+}
+
+.ef-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.ef-sheet-item {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ef-hairline);
+  background: var(--ef-canvas);
+  font-family: var(--ef-font-heiti);
+  font-size: 13px;
+  color: var(--ef-ink-muted);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.ef-sheet-item.is-current {
+  border: 2px solid var(--ef-primary);
+  color: var(--ef-primary);
+  font-weight: 700;
+}
+
+.ef-sheet-item.is-answered {
+  background: var(--ef-primary);
+  border-color: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-sheet-item.is-marked {
+  border-color: var(--ef-warning);
+  color: var(--ef-warning);
+}
+
+.ef-question-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+.ef-question {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.ef-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ef-hairline);
+}
+
+.ef-question-header .ef-q-no {
+  font-family: var(--ef-font-heiti);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ef-ink);
+}
+
+.ef-question-header .ef-q-score {
+  font-size: 14px;
+  color: var(--ef-ink-muted);
+}
+
+.ef-question-stem {
+  font-size: 16px;
+  line-height: 1.9;
+  margin-bottom: 24px;
+}
+
+.ef-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--ef-hairline);
+  margin-bottom: 12px;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.ef-option:hover {
+  background: var(--ef-surface-1);
+}
+
+.ef-option.is-selected {
+  border-color: var(--ef-primary);
+  background: var(--ef-surface-1);
+}
+
+.ef-option .ef-option-key {
+  font-family: var(--ef-font-heiti);
+  font-weight: 700;
+  color: var(--ef-primary);
+  min-width: 20px;
+}
+
+.ef-action-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ef-hairline);
+}
+
+.ef-btn {
+  display: inline-block;
+  border: 1px solid var(--ef-primary);
+  border-radius: 0;
+  padding: 10px 28px;
+  font-family: var(--ef-font-heiti);
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  background: var(--ef-canvas);
+  color: var(--ef-primary);
+}
+
+.ef-btn-primary {
+  background: var(--ef-primary);
+  color: var(--ef-inverse-ink);
+}
+
+.ef-btn-primary:hover {
+  background: var(--ef-primary-hover);
+  color: var(--ef-inverse-ink);
+}
+
+/* ---------- 考前须知与交卷确认(居中卡片) ---------- */
+
+.ef-center-screen {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ef-surface-1);
+}
+
+.ef-center-card {
+  background: var(--ef-canvas);
+  border: 1px solid var(--ef-hairline);
+  border-top: 3px solid var(--ef-primary);
+  border-radius: 0;
+  padding: 32px 48px;
+  max-width: 640px;
+  width: 100%;
+}
+
+.ef-center-card h1 {
+  font-family: var(--ef-font-heiti);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.ef-center-card p {
+  font-size: 15px;
+  color: var(--ef-ink-muted);
+  line-height: 2;
+  margin-bottom: 8px;
+}
