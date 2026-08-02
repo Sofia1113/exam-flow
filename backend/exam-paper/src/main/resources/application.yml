@@ -31,3 +31,11 @@ springdoc:
 logging:
   level:
     com.examflow: info
+
+# Feign 超时(避免默认 10s×5 重试导致链路卡顿)
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 10000

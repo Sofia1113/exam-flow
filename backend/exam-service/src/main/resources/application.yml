@@ -1,6 +1,11 @@
 server:
   port: 8086
 
+# 服务间地址(生产注册 Nacos 后由服务发现替换)
+examflow:
+  paper-service-url: ${PAPER_SERVICE_URL:http://127.0.0.1:8084}
+  grading-service-url: ${GRADING_SERVICE_URL:http://127.0.0.1:8088}
+
 spring:
   application:
     name: exam-service
@@ -38,3 +43,11 @@ springdoc:
 logging:
   level:
     com.examflow: info
+
+# Feign 超时(避免默认 10s×5 重试导致链路卡顿)
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 10000

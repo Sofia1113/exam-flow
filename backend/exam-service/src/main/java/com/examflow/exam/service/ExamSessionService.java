@@ -1,11 +1,11 @@
 package com.examflow.exam.service;
 
-import com.examflow.exam.entity.ExamSession;
+import com.examflow.exam.dto.ExamDTO;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 考试会话服务(骨架)。
+ * 考试会话服务。
  *
  * <p>生产化要点(TDD §3.2/§3.3/§6):
  * <ul>
@@ -17,10 +17,10 @@ import java.util.Map;
 public interface ExamSessionService {
 
     /** 进入考试:校验场次时间窗/已交卷/进入次数,抽卷并创建会话。 */
-    ExamSession enter(Long registrationId, String clientIp, String deviceFp);
+    ExamDTO.EnterResp enter(Long registrationId, String clientIp, String deviceFp);
 
-    /** 断线恢复:返回已落库明细与 lastSeq。 */
-    ExamSession resume(Long sessionId, Long registrationId);
+    /** 断线恢复:返回已落库明细与 lastSeq,剩余时间以服务器计算。 */
+    ExamDTO.ResumeResp resume(Long sessionId, Long registrationId);
 
     /** 保存作答增量:返回服务端最新 lastSeq(客户端从断点重发)。 */
     long saveAnswers(Long sessionId, Long registrationId, long fromSeq, List<Map<String, Object>> answers);
@@ -28,6 +28,6 @@ public interface ExamSessionService {
     /** 心跳:更新在线状态。 */
     void heartbeat(Long sessionId, Long registrationId);
 
-    /** 交卷:幂等提交。 */
+    /** 交卷:幂等提交,落库后触发判分。 */
     void submit(Long sessionId, Long registrationId, List<Map<String, Object>> answers, String sign);
 }

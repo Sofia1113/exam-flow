@@ -3,6 +3,7 @@ package com.examflow.exam.controller;
 import com.examflow.common.audit.AuditLog;
 import com.examflow.common.core.ErrorCode;
 import com.examflow.common.core.Result;
+import com.examflow.exam.dto.ExamDTO;
 import com.examflow.exam.service.ExamSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,13 +41,13 @@ public class ExamController {
     @PostMapping("/sessions")
     @Operation(summary = "进入考试(校验 + 抽卷 + 创建会话)")
     @AuditLog(module = "exam", action = "进入考试")
-    public Result<Object> enter(@RequestBody EnterReq req) {
+    public Result<ExamDTO.EnterResp> enter(@RequestBody EnterReq req) {
         return Result.ok(examSessionService.enter(req.registrationId(), req.clientIp(), req.deviceFp()));
     }
 
     @PostMapping("/sessions/{id}/resume")
     @Operation(summary = "断线恢复(返回已存答案与剩余时间)")
-    public Result<Object> resume(@PathVariable Long id, @RequestBody ResumeReq req) {
+    public Result<ExamDTO.ResumeResp> resume(@PathVariable Long id, @RequestBody ResumeReq req) {
         return Result.ok(examSessionService.resume(id, req.registrationId()));
     }
 
