@@ -1,8 +1,15 @@
 package com.examflow.auth.controller;
 
+import com.examflow.auth.client.UserServiceClient;
+import com.examflow.auth.dto.UserInfo;
+import com.examflow.auth.service.TokenService;
+import com.examflow.auth.util.JwtUtil;
 import com.examflow.common.audit.AuditLog;
+import com.examflow.common.core.BusinessException;
 import com.examflow.common.core.ErrorCode;
 import com.examflow.common.core.Result;
+import com.examflow.common.util.PasswordUtil;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
@@ -11,17 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 认证接口(骨架,见 TDD §5.2)。
- * 生产化 TODO:
- * 1. 对接 user-service 校验账号状态与口令(PasswordUtil);
- * 2. 签发 JWT 双令牌(access 30min / refresh 7d,Redis 支持强制下线);
- * 3. 登录频控(5 次/分钟/IP)、图形验证码、连续 5 次失败锁定 30 分钟;
- * 4. 政企内部员工支持 SSO/OAuth2-OIDC/LDAP 对接。
+ * 认证接口:账号密码登录(JWT 双令牌)、刷新、退出撤销。
+ * 安全要求:登录频控(5 次/分钟/IP)、连续 5 次失败锁定 30 分钟(FR-AUTH-02)待 M1-005 落地。
  */
 @Slf4j
 @RestController
@@ -30,35 +34,60 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "认证服务")
 public class AuthController {
 
+    private final UserServiceClient userServiceClient;
+    private final TokenService tokenService;
+
     @PostMapping("/login")
-    @Operation(summary = "账号密码登录")
+    @Operation(summary = "账号密码登录,签发 access+refresh 双令牌")
     @AuditLog(module = "auth", action = "账号密码登录")
-    public Result<LoginResp> login(@RequestBody LoginReq req) {
-        log.info("登录请求: username={}", req.username());
-        // TODO: 校验账号 + 口令,签发双令牌
-        return Result.fail(ErrorCode.UNIMPLEMENTED);
+    public Result<TokenService.TokenPair> login(@RequestBody LoginReq req) {
+        UserInfo user = userServiceClient.getByUsername(req.username());
+        if (user == null || !PasswordUtil.matches(req.password(), user.passwordHash())) {
+            log.warn("登录失败: username={}, 账号或密码错误", req.username());
+            throw new BusinessException(ErrorCode.LOGIN_FAILED);
+        }
+        if (!"enabled".equals(user.status())) {
+            log.warn("登录被拒: username={}, 账号状态={}", req.username(), user.status());
+            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
+        }
+        return Result.ok(tokenService.issue(user.userId(), user.username()));
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "凭 refresh 令牌换发新 access 令牌")
+    public Result<TokenService.TokenPair> refresh(@RequestBody RefreshReq req) {
+        Claims claims = tokenService.verify(req.refreshToken(), JwtUtil.TOKEN_TYPE_REFRESH);
+        Long userId = Long.valueOf(claims.getSubject());
+        String username = claims.get("username", String.class);
+        // TODO: 轮换策略 —— 如需 refresh 也轮换,在此撤销旧 refresh 并签发新 refresh
+        return Result.ok(tokenService.issue(userId, username));
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "退出登录:撤销 access 与 refresh 令牌")
+    @AuditLog(module = "auth", action = "退出登录")
+    public Result<Void> logout(@RequestHeader("Authorization") String authorization,
+                               @RequestBody(required = false) LogoutReq req) {
+        // 撤销当前 access
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            tokenService.revoke(authorization.substring(7));
+        }
+        // 撤销 refresh(客户端传回,可选)
+        if (req != null && req.refreshToken() != null && !req.refreshToken().isBlank()) {
+            tokenService.revoke(req.refreshToken());
+        }
+        return Result.ok();
     }
 
     @GetMapping("/sms/code")
-    @Operation(summary = "发送短信验证码")
+    @Operation(summary = "发送短信验证码(M1-004 实现)")
     public Result<Void> sendSmsCode(@RequestParam @NotBlank String phone) {
-        log.info("发送短信验证码: phone={}", phone);
-        // TODO: 频控(1 分钟间隔/10 次每日上限)+ 调用 message-service 发送
         return Result.fail(ErrorCode.UNIMPLEMENTED);
     }
 
     @PostMapping("/sms/login")
-    @Operation(summary = "短信验证码登录")
-    public Result<LoginResp> smsLogin(@RequestBody SmsLoginReq req) {
-        log.info("短信登录: phone={}", req.phone());
-        // TODO: 校验验证码,登录或自动注册
-        return Result.fail(ErrorCode.UNIMPLEMENTED);
-    }
-
-    @PostMapping("/refresh")
-    @Operation(summary = "刷新访问令牌")
-    public Result<LoginResp> refresh(@RequestBody RefreshReq req) {
-        // TODO: 校验 refresh_token(可撤销),签发新 access_token
+    @Operation(summary = "短信验证码登录(M1-004 实现)")
+    public Result<TokenService.TokenPair> smsLogin(@RequestBody SmsLoginReq req) {
         return Result.fail(ErrorCode.UNIMPLEMENTED);
     }
 
@@ -71,6 +100,6 @@ public class AuthController {
     public record RefreshReq(@NotBlank String refreshToken) {
     }
 
-    public record LoginResp(String accessToken, String refreshToken, Long userId, String name) {
+    public record LogoutReq(String refreshToken) {
     }
 }

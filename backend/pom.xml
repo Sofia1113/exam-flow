@@ -44,6 +44,7 @@
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <springdoc.version>2.3.0</springdoc.version>
+        <jjwt.version>0.12.5</jjwt.version>
     </properties>
 
     <!-- 父 pom 统一声明公共依赖,全部子模块继承 -->
@@ -96,6 +97,22 @@
                 <groupId>com.examflow</groupId>
                 <artifactId>exam-common</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <!-- JWT(auth 签发 / gateway 校验,同库同版本) -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,0 +1,5 @@
+# exam-common 自动配置注册:
+# 服务组件扫描范围不含 com.examflow.common 包,公共组件须经此文件注册
+com.examflow.common.core.GlobalExceptionHandler
+com.examflow.common.config.MybatisPlusConfig
+com.examflow.common.audit.AuditLogAspect

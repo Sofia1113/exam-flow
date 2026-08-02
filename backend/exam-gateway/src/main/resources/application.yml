@@ -1,15 +1,23 @@
 server:
   port: 8080
 
-# 安全基线:鉴权默认开启(fail-closed,JWT 校验实现前拒绝一切非白名单请求)。
-# 本地联调可临时设 false,严禁用于生产。
+# 安全基线:鉴权默认开启;本地联调可临时设 false,严禁用于生产。
 examflow:
   security:
     auth-enabled: true
+  # JWT 校验配置:与 auth 服务共享同一密钥(生产经 JWT_SECRET 注入,≥ 32 字节)
+  jwt:
+    secret: ${JWT_SECRET:exam-flow-dev-jwt-secret-key-0123456789abcdef}
+    blacklist-prefix: examflow:jwt:blacklist
 
 spring:
   application:
     name: exam-gateway
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
   cloud:
     # Nacos 注册中心:本地默认关闭;生产启用时改为 enabled: true 并配置 server-addr,
     # 路由 uri 同步改为 lb://服务名
@@ -69,9 +77,15 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            # 生产环境必须收紧为实际站点域名列表
-            allowedOriginPatterns: "*"
-            allowedMethods: "*"
+            # 安全基线:严禁 allowCredentials: true 与 "*" 通配符组合;
+            # 仅允许实际前端站点来源(本地 Vite 端口 + 生产域名,按需增删)
+            allowedOriginPatterns:
+              - http://localhost:5173
+              - http://localhost:5174
+              - http://localhost:5175
+              - https://exam.example.gov.cn
+              - https://admin.example.gov.cn
+            allowedMethods: GET,POST,PUT,DELETE,OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
