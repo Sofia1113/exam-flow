@@ -254,7 +254,6 @@ public class ScoreService {
             return null;
         }
     }
-    }
 
     /** 成绩导出(按考次,加密 Excel 待 M5 落地,当前普通导出)。 */
     public void exportScores(java.io.OutputStream out, Long planId) {
