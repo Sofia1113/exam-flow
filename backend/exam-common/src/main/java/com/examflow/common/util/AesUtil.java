@@ -23,8 +23,9 @@ public final class AesUtil {
     private static final int TAG_BITS = 128;
     private static final int NONCE_LEN = 12;
 
-    /** 开发默认密钥(仅本地开发使用,生产必须注入 EXAMSECRET_KEY)。 */
-    private static final String DEV_KEY_B64 = "RGV2U2VjcmV0S2V5MDEyMzQ1Njc4OWFiY2RlZjEyMzQ1Ng==";
+    /** 开发默认密钥(仅本地开发使用,生产必须注入 EXAMSECRET_KEY)。
+     *  解码后必须恰为 32 字节(256bit)。 */
+    private static final String DEV_KEY_B64 = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=";
 
     private static volatile boolean devKeyWarned = false;
 

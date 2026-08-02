@@ -20,7 +20,7 @@ import com.examflow.user.mapper.RolePermMapper;
 import com.examflow.user.mapper.UserMapper;
 import com.examflow.user.mapper.UserRoleMapper;
 import com.examflow.user.util.DesensitizeUtil;
-import com.examflow.user.util.UserContext;
+import com.examflow.common.context.UserContext;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

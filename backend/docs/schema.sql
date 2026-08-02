@@ -166,7 +166,7 @@ CREATE TABLE `question` (
 CREATE TABLE `question_version` (
     `id`               BIGINT   NOT NULL AUTO_INCREMENT,
     `question_id`      BIGINT   NOT NULL,
-    `content_snapshot` LONGTEXT NOT NULL COMMENT '变更前内容(JSON)',
+    `content_snapshot` LONGTEXT DEFAULT NULL COMMENT '变更前内容(JSON,创建时为空)',
     `operator_id`      BIGINT   NOT NULL,
     `operate_type`     VARCHAR(32) NOT NULL COMMENT 'create/update/audit/disable',
     `create_time`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -513,6 +513,10 @@ INSERT INTO `sys_param` (`param_key`, `param_value`, `param_desc`) VALUES
 ('score.publicity_days', '3', '成绩公示期(天)'),
 ('exam.max_enter_count', '3', '单场考试允许进入次数'),
 ('exam.late_minutes', '30', '开考后禁止入场分钟数');
+
+INSERT INTO `sys_subject` (`id`, `code`, `name`, `status`) VALUES
+(1, 'ZONGHE', '综合能力', 'enabled'),
+(2, 'GANGGANG', '岗位技能', 'enabled');
 
 INSERT INTO `sys_dict` (`dict_type`, `dict_code`, `dict_label`, `sort_no`) VALUES
 ('exam_plan_status', 'draft', '草稿', 1),
