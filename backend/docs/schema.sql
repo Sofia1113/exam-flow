@@ -275,6 +275,7 @@ CREATE TABLE `exam_registration` (
     `plan_id`        BIGINT       NOT NULL,
     `user_id`        BIGINT       NOT NULL,
     `slot_id`        BIGINT       DEFAULT NULL COMMENT '场次(排考后回填)',
+    `seat_no`        VARCHAR(32)  DEFAULT NULL COMMENT '机位号(排考后分配)',
     `status`         VARCHAR(16)  NOT NULL DEFAULT 'pending' COMMENT 'pending/approved/rejected/withdrawn',
     `audit_by`       BIGINT       DEFAULT NULL,
     `audit_opinion`  VARCHAR(512) DEFAULT NULL,

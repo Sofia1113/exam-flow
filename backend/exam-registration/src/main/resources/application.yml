@@ -1,6 +1,10 @@
 server:
   port: 8085
 
+# user-service 地址(生产注册 Nacos 后由服务发现替换)
+examflow:
+  user-service-url: ${USER_SERVICE_URL:http://127.0.0.1:8082}
+
 spring:
   application:
     name: exam-registration

@@ -46,6 +46,13 @@ public class InternalUserController {
         return userService.getUserPerms(id);
     }
 
+    /** 按 ID 查询(报名资格校验等场景)。 */
+    @GetMapping("/{id}")
+    public UserInfo getUser(@PathVariable Long id) {
+        SysUser user = userMapper.selectById(id);
+        return user == null ? null : toInfo(user);
+    }
+
     /** 按手机号查询(密文匹配);不存在返回 null。 */
     @GetMapping("/by-phone")
     public UserInfo getByPhone(@RequestParam String phone) {
