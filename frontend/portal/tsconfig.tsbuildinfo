@@ -1,1 +1,0 @@
-{"root":["./src/main.ts","./src/api/request.ts","./src/router/index.ts","./src/app.vue","./src/components/sitefooter.vue","./src/components/siteheader.vue","./src/views/applyview.vue","./src/views/examsview.vue","./src/views/homeview.vue","./src/views/scoreview.vue"],"version":"5.9.3"}
