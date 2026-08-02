@@ -75,7 +75,7 @@ public class UserService {
         return toVO(user);
     }
 
-    /** 创建用户:用户名唯一、密码 bcrypt、可选分配角色。 */
+    /** 创建用户:用户名唯一、密码复杂度校验、bcrypt、敏感字段加密、可选分配角色。 */
     @Transactional
     public Long create(SysUser user, List<Long> roleIds) {
         Long exists = userMapper.selectCount(Wrappers.lambdaQuery(SysUser.class)
@@ -83,11 +83,35 @@ public class UserService {
         if (exists > 0) {
             throw new BusinessException(ErrorCode.BIZ_ERROR, "用户名已存在");
         }
+        PasswordPolicy.validate(user.getPasswordHash());
         user.setPasswordHash(PasswordUtil.encode(user.getPasswordHash()));
+        user.setPhone(encryptSensitive(user.getPhone()));
+        user.setIdCard(encryptSensitive(user.getIdCard()));
         user.setStatus("enabled");
         userMapper.insert(user);
         assignRoles(user.getId(), roleIds);
         log.info("创建用户: id={}, username={}", user.getId(), user.getUsername());
+        return user.getId();
+    }
+
+    /** 短信验证码自动注册(FR-AUTH-01):外部考生,随机强口令,手机号作登录标识。 */
+    @Transactional
+    public Long autoRegister(String phone) {
+        String username = "u" + phone;
+        Long exists = userMapper.selectCount(Wrappers.lambdaQuery(SysUser.class)
+                .eq(SysUser::getUsername, username));
+        if (exists > 0) {
+            throw new BusinessException(ErrorCode.BIZ_ERROR, "该手机号已注册");
+        }
+        SysUser user = new SysUser();
+        user.setUsername(username);
+        user.setPasswordHash(PasswordUtil.encode(java.util.UUID.randomUUID().toString().replace("-", "") + "Aa1!"));
+        user.setName("考生" + (phone.length() >= 4 ? phone.substring(phone.length() - 4) : phone));
+        user.setPhone(encryptSensitive(phone));
+        user.setUserType("external");
+        user.setStatus("enabled");
+        userMapper.insert(user);
+        log.info("短信自动注册: id={}, username={}", user.getId(), username);
         return user.getId();
     }
 
@@ -99,13 +123,14 @@ public class UserService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
         }
         if (user.getPasswordHash() != null && !user.getPasswordHash().isBlank()) {
+            PasswordPolicy.validate(user.getPasswordHash());
             exist.setPasswordHash(PasswordUtil.encode(user.getPasswordHash()));
         }
         if (user.getName() != null) {
             exist.setName(user.getName());
         }
         if (user.getPhone() != null) {
-            exist.setPhone(user.getPhone());
+            exist.setPhone(encryptSensitive(user.getPhone()));
         }
         if (user.getOrgId() != null) {
             exist.setOrgId(user.getOrgId());
@@ -173,6 +198,18 @@ public class UserService {
         }
         List<Long> roleIds = roles.stream().map(SysRole::getId).toList();
         return rolePermsOf(roleIds);
+    }
+
+    /** 手机号/身份证 AES 加密存储(与 by-phone 查询的加密匹配一致)。 */
+    private String encryptSensitive(String plain) {
+        if (plain == null || plain.isBlank()) {
+            return null;
+        }
+        try {
+            return com.examflow.common.util.AesUtil.encrypt(plain);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "敏感字段加密失败");
+        }
     }
 
     /** 当前用户可见组织范围:null 表示全部(不限制)。 */

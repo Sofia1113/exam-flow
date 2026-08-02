@@ -1,8 +1,11 @@
 package com.examflow.auth.client;
 
 import com.examflow.auth.dto.UserInfo;
+import com.examflow.auth.dto.RegisterReq;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -16,4 +19,12 @@ public interface UserServiceClient {
     /** 按登录账号查询用户(含口令哈希,仅供认证服务使用)。 */
     @GetMapping("/internal/users/by-username")
     UserInfo getByUsername(@RequestParam("username") String username);
+
+    /** 按手机号查询(短信登录用,密文匹配)。 */
+    @GetMapping("/internal/users/by-phone")
+    UserInfo getByPhone(@RequestParam("phone") String phone);
+
+    /** 短信验证码自动注册(external 考生)。 */
+    @PostMapping("/internal/users/register")
+    Long register(@RequestBody RegisterReq req);
 }
