@@ -88,24 +88,64 @@ public class QuestionController {
     }
 
     @PostMapping("/{id}/submit")
-    @Operation(summary = "送审(M1-007 实现)")
+    @Operation(summary = "送审(草稿→待审)")
+    @AuditLog(module = "question", action = "题目送审")
     public Result<Void> submit(@PathVariable Long id) {
-        return Result.fail(ErrorCode.UNIMPLEMENTED);
+        questionService.submit(id);
+        return Result.ok();
     }
 
     @PostMapping("/{id}/audit")
-    @Operation(summary = "审题(M1-007 实现)")
+    @Operation(summary = "审题(出题人不可审本人题目;通过→已审,驳回→草稿)")
+    @AuditLog(module = "question", action = "题目审核")
     public Result<Void> audit(@PathVariable Long id, @RequestParam boolean pass,
                               @RequestParam(required = false) String opinion) {
-        return Result.fail(ErrorCode.UNIMPLEMENTED);
+        questionService.audit(id, pass, opinion);
+        return Result.ok();
     }
 
-    @PostMapping("/import")
-    @Operation(summary = "批量导入(M1-008 实现)")
-    public Result<Object> importExcel(@RequestBody ImportReq req) {
-        return Result.fail(ErrorCode.UNIMPLEMENTED);
+    @PostMapping("/{id}/publish")
+    @Operation(summary = "发布(已审→已发布,组卷候选题)")
+    @AuditLog(module = "question", action = "题目发布")
+    public Result<Void> publish(@PathVariable Long id) {
+        questionService.publish(id);
+        return Result.ok();
     }
 
-    public record ImportReq(@NotBlank String fileUrl, Long subjectId) {
+    @PostMapping("/{id}/disable")
+    @Operation(summary = "停用(已发布→停用,修改后重新送审)")
+    @AuditLog(module = "question", action = "题目停用")
+    public Result<Void> disable(@PathVariable Long id) {
+        questionService.disable(id);
+        return Result.ok();
+    }
+
+    @PostMapping(value = "/import", consumes = "multipart/form-data")
+    @Operation(summary = "Excel 批量导入(逐行校验报告)")
+    @AuditLog(module = "question", action = "批量导入题目")
+    public Result<com.examflow.question.dto.ImportResult> importExcel(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws Exception {
+        return Result.ok(questionService.importExcel(file.getInputStream()));
+    }
+
+    @GetMapping("/export")
+    @Operation(summary = "导出题目 Excel(含解密答案,权限待方法级鉴权)")
+    public void export(@RequestParam(required = false) String type,
+                       @RequestParam(required = false) Long subjectId,
+                       @RequestParam(required = false) String status,
+                       @RequestParam(required = false) String keyword,
+                       jakarta.servlet.http.HttpServletResponse response) throws Exception {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition",
+                "attachment; filename=questions.xlsx");
+        questionService.exportExcel(response.getOutputStream(), type, subjectId, status, keyword);
+    }
+
+    @GetMapping("/template")
+    @Operation(summary = "下载导入模板")
+    public void template(jakarta.servlet.http.HttpServletResponse response) throws Exception {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=question-template.xlsx");
+        questionService.template(response.getOutputStream());
     }
 }

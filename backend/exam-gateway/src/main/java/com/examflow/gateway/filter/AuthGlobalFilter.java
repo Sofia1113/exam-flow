@@ -97,9 +97,12 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
                         log.debug("令牌已撤销,拒绝: jti={}", claims.getId());
                         return unauthorized(exchange);
                     }
-                    // 透传用户上下文,下游服务据此做资源归属校验(见 TDD §7.3)
+                    // 透传用户上下文:附带 HMAC 签名防伪造 —— 服务端校验
+                    // X-User-Sign 通过后才信任 X-User-Id(见 UserContext)
+                    String sign = com.examflow.gateway.util.SignUtil.hmac(jwtSecret, claims.getSubject());
                     ServerWebExchange mutated = exchange.mutate()
-                            .request(r -> r.header("X-User-Id", claims.getSubject()))
+                            .request(r -> r.header("X-User-Id", claims.getSubject())
+                                    .header("X-User-Sign", sign))
                             .build();
                     return chain.filter(mutated);
                 });

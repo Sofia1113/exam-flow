@@ -154,6 +154,7 @@ CREATE TABLE `question` (
     `subject_id`  BIGINT       NOT NULL COMMENT '科目 ID',
     `status`      VARCHAR(16)  NOT NULL DEFAULT 'draft' COMMENT 'draft/pending/approved/published/disabled',
     `source`      VARCHAR(64)  DEFAULT NULL COMMENT '题目来源',
+    `creator_id`  BIGINT       DEFAULT NULL COMMENT '出题人(审题校验出题人≠审题人)',
     `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted`     TINYINT      NOT NULL DEFAULT 0,

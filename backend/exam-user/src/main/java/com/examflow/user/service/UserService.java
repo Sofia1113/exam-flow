@@ -161,6 +161,20 @@ public class UserService {
                 perms, scopeTypes);
     }
 
+    /** 指定用户的有效权限码集合(内部接口用):SYS_ADMIN 返回 ["*"]。 */
+    public List<String> getUserPerms(Long userId) {
+        List<SysRole> roles = rolesOf(userId);
+        if (roles.isEmpty()) {
+            return List.of();
+        }
+        boolean isSuper = roles.stream().anyMatch(r -> "SYS_ADMIN".equals(r.getCode()));
+        if (isSuper) {
+            return List.of("*");
+        }
+        List<Long> roleIds = roles.stream().map(SysRole::getId).toList();
+        return rolePermsOf(roleIds);
+    }
+
     /** 当前用户可见组织范围:null 表示全部(不限制)。 */
     private List<Long> visibleOrgIds(Long userId) {
         List<SysRole> roles = rolesOf(userId);

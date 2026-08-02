@@ -41,4 +41,7 @@ public class Question extends BaseEntity {
 
     /** 题目来源 */
     private String source;
+
+    /** 出题人(审题流程校验出题人≠审题人,并支持归属校验) */
+    private Long creatorId;
 }
