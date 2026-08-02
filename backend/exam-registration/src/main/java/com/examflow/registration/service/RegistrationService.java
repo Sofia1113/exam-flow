@@ -41,6 +41,7 @@ public class RegistrationService {
     private final ExamRegistrationMapper registrationMapper;
     private final ExamSlotMapper slotMapper;
     private final UserServiceClient userClient;
+    private final com.examflow.registration.client.MessageServiceClient messageClient;
     private final ObjectMapper objectMapper;
 
     // ---------- 考试计划(FR-REG-01) ----------
@@ -156,9 +157,26 @@ public class RegistrationService {
         if ("approved".equals(autoStatus)) {
             reg.setTicketNo(genTicketNo(planId, reg.getId()));
             registrationMapper.updateById(reg);
+            notifyApproved(plan, reg, user);
         }
         log.info("报名提交: plan={}, user={}, 自动预审={}", planId, userId, autoStatus);
         return reg.getId();
+    }
+
+    /** 审核通过通知(FR-MSG-03):短信 + 站内信。 */
+    private void notifyApproved(ExamPlan plan, ExamRegistration reg, UserInfo user) {
+        try {
+            Map<String, Object> params = Map.of("name", user.name(), "examName", plan.getName(),
+                    "ticketNo", reg.getTicketNo() == null ? "" : reg.getTicketNo());
+            if (user.phone() != null) {
+                messageClient.send(new com.examflow.registration.client.MessageServiceClient.SendReq(
+                        "reg_approved", user.phone(), "sms", params));
+            }
+            messageClient.send(new com.examflow.registration.client.MessageServiceClient.SendReq(
+                    "reg_approved", String.valueOf(user.userId()), "site", params));
+        } catch (Exception e) {
+            log.warn("报名通知发送失败(不影响主流程): reg={}", reg.getId(), e);
+        }
     }
 
     /** 人工审核:通过发放准考证,驳回释放名额(FR-REG-04)。 */
@@ -176,6 +194,24 @@ public class RegistrationService {
             reg.setTicketNo(genTicketNo(reg.getPlanId(), reg.getId()));
         }
         registrationMapper.updateById(reg);
+        // 审核结果通知
+        try {
+            UserInfo user = userClient.getUser(reg.getUserId());
+            ExamPlan plan = planMapper.selectById(reg.getPlanId());
+            if (user != null && plan != null) {
+                Map<String, Object> params = Map.of("name", user.name(), "examName", plan.getName(),
+                        "ticketNo", reg.getTicketNo() == null ? "" : reg.getTicketNo(),
+                        "opinion", opinion == null ? "" : opinion);
+                if (user.phone() != null) {
+                    messageClient.send(new com.examflow.registration.client.MessageServiceClient.SendReq(
+                            pass ? "reg_approved" : "reg_rejected", user.phone(), "sms", params));
+                }
+                messageClient.send(new com.examflow.registration.client.MessageServiceClient.SendReq(
+                        pass ? "reg_approved" : "reg_rejected", String.valueOf(user.userId()), "site", params));
+            }
+        } catch (Exception e) {
+            log.warn("审核通知发送失败(不影响主流程): reg={}", reg.getId(), e);
+        }
     }
 
     /** 排考:分配场次与机位,冲突检测(FR-SCHED-05)。 */

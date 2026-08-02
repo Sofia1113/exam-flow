@@ -1,6 +1,7 @@
 package com.examflow.exam.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.examflow.common.context.UserContext;
 import com.examflow.common.core.BusinessException;
 import com.examflow.common.core.ErrorCode;
 import com.examflow.common.util.AesUtil;
@@ -72,10 +73,13 @@ public class ExamSessionServiceImpl implements ExamSessionService {
     @Override
     @Transactional
     public ExamDTO.EnterResp enter(Long registrationId, String clientIp, String deviceFp) {
-        // 1. 报名资格
+        // 1. 报名资格 + 归属校验(IDOR 防护:仅本人可进入本人报名)
         ExamRegistration reg = registrationMapper.selectById(registrationId);
         if (reg == null || !"approved".equals(reg.getStatus())) {
             throw new BusinessException(ErrorCode.BIZ_ERROR, "报名未通过审核,无法进入考试");
+        }
+        if (!reg.getUserId().equals(UserContext.requireUserId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无权进入该考试");
         }
         // 2. 场次时间窗:开考前 30 分钟可进,开考后 30 分钟禁止入场(FR-EXAM-01)
         ExamSlotView slot = slotMapper.selectById(reg.getSlotId());
@@ -305,6 +309,12 @@ public class ExamSessionServiceImpl implements ExamSessionService {
         ExamSession session = sessionMapper.selectById(sessionId);
         if (session == null || !session.getRegistrationId().equals(registrationId)) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "会话不存在");
+        }
+        // IDOR 防护:会话必须归属当前用户(经网关 X-User-Id 透传)
+        ExamRegistration reg = registrationMapper.selectById(session.getRegistrationId());
+        Long currentUserId = UserContext.currentUserId();
+        if (reg == null || currentUserId == null || !reg.getUserId().equals(currentUserId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无权操作该会话");
         }
         return session;
     }

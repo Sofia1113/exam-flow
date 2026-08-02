@@ -441,16 +441,17 @@ CREATE TABLE `score_correction` (
     `id`          BIGINT        NOT NULL AUTO_INCREMENT,
     `score_id`    BIGINT        NOT NULL,
     `from_value`  DECIMAL(8, 2) NOT NULL,
-    `to_value`    DECIMAL(8, 2) NOT NULL,
+    `to_value`    DECIMAL(8, 2) DEFAULT NULL COMMENT '更正目标分(申诉可空)',
     `reason`      VARCHAR(512)  NOT NULL,
     `applicant`   BIGINT        NOT NULL,
     `approver`    BIGINT        DEFAULT NULL,
     `approve_time` DATETIME     DEFAULT NULL,
+    `type`        VARCHAR(16)   NOT NULL DEFAULT 'correct' COMMENT 'appeal=公示期异议/correct=发布后更正',
     `status`      VARCHAR(16)   NOT NULL DEFAULT 'pending' COMMENT 'pending/approved/rejected',
     `create_time` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_score` (`score_id`)
-) ENGINE = InnoDB COMMENT ='成绩更正记录';
+) ENGINE = InnoDB COMMENT ='成绩更正与申诉记录';
 
 -- 审计日志:★ 只追加,禁止 update/delete;独立存储,留存 ≥ 5 年;
 -- 生产环境授予 INSERT/SELECT 权限并移除 DML 权限
@@ -471,6 +472,20 @@ CREATE TABLE `audit_log` (
     KEY `idx_operator_time` (`operator_id`, `create_time`),
     KEY `idx_module_time` (`module`, `create_time`)
 ) ENGINE = InnoDB COMMENT ='审计日志(只追加,禁改禁删)';
+
+-- 通知模板:占位符 ${key} 渲染
+CREATE TABLE `notify_template` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `code`        VARCHAR(64)  NOT NULL COMMENT '模板编码,如 reg_approved',
+    `channel`     VARCHAR(16)  NOT NULL COMMENT 'sms/site/email',
+    `title`       VARCHAR(128) DEFAULT NULL,
+    `content`     LONGTEXT     NOT NULL COMMENT '正文(含 ${name} 等占位符)',
+    `status`      VARCHAR(16)  NOT NULL DEFAULT 'enabled',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code` (`code`)
+) ENGINE = InnoDB COMMENT ='通知模板';
 
 -- 通知记录:渠道/模板/回执,失败重试 3 次
 CREATE TABLE `notify_record` (
@@ -522,6 +537,12 @@ INSERT INTO `sys_param` (`param_key`, `param_value`, `param_desc`) VALUES
 INSERT INTO `sys_subject` (`id`, `code`, `name`, `status`) VALUES
 (1, 'ZONGHE', '综合能力', 'enabled'),
 (2, 'GANGGANG', '岗位技能', 'enabled');
+
+INSERT INTO `notify_template` (`code`, `channel`, `title`, `content`) VALUES
+('reg_approved', 'sms', '报名审核通过', '【国家考试信息网】${name},您报名的《${examName}》已通过审核,准考证号:${ticketNo},请及时查看考试安排。'),
+('reg_rejected', 'sms', '报名审核驳回', '【国家考试信息网】${name},您报名的《${examName}》未通过审核,原因:${opinion}。'),
+('exam_reminder', 'sms', '考试提醒', '【国家考试信息网】${name},《${examName}》将于 ${examTime} 开考,请提前 30 分钟进入考试系统。'),
+('score_published', 'site', '成绩公布', '【国家考试信息网】${name},您参加的《${examName}》成绩已公布,请登录查询。');
 
 INSERT INTO `sys_dict` (`dict_type`, `dict_code`, `dict_label`, `sort_no`) VALUES
 ('exam_plan_status', 'draft', '草稿', 1),

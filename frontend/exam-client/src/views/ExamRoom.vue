@@ -21,11 +21,20 @@ interface Question {
 const route = useRoute()
 const registrationId = Number(route.query.registrationId)
 
-// 令牌:门户跳转时经 URL 传递(跨端口 localStorage 不共享);
-// 生产建议与门户同域部署或走 OAuth 跳转,避免令牌入 URL
-const urlToken = route.query.token as string | undefined
-if (urlToken) {
-  localStorage.setItem('examflow_token', urlToken)
+// 令牌获取:同域部署直接共享 localStorage;
+// 跨域由门户窗口 postMessage 握手传递(禁止令牌入 URL,防日志/历史泄露)
+const portalOrigin = import.meta.env.VITE_PORTAL_ORIGIN || 'http://localhost:5173'
+if (!localStorage.getItem('examflow_token') && window.opener) {
+  const handler = (event: MessageEvent) => {
+    if (event.origin !== portalOrigin) return
+    if (event.data?.type === 'examflow:token' && event.data.token) {
+      localStorage.setItem('examflow_token', event.data.token)
+      window.removeEventListener('message', handler)
+    }
+  }
+  window.addEventListener('message', handler)
+  window.opener.postMessage('examflow:request-token', portalOrigin)
+  window.setTimeout(() => window.removeEventListener('message', handler), 10_000)
 }
 
 const api = axios.create({ baseURL: '/api/v1', timeout: 15_000 })

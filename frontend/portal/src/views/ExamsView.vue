@@ -18,13 +18,21 @@ async function load() {
   }
 }
 
-/** 进入考试:跳转考试端(URL 携带 registrationId 与令牌) */
+/** 进入考试:跳转考试端(令牌经 postMessage 握手传递,严禁放 URL) */
 function enterExam(exam: any) {
-  const token = localStorage.getItem('examflow_token') || ''
-  window.open(
-    `${import.meta.env.VITE_EXAM_CLIENT_URL || 'http://localhost:5175'}/exam?registrationId=${exam.registrationId}&token=${encodeURIComponent(token)}`,
-    '_blank'
-  )
+  const examClientOrigin = import.meta.env.VITE_EXAM_CLIENT_ORIGIN || 'http://localhost:5175'
+  window.open(`${examClientOrigin}/exam?registrationId=${exam.registrationId}`, '_blank')
+  // 考试端发来令牌请求时,经 event.source 回发(校验来源)
+  const handler = (event: MessageEvent) => {
+    if (event.origin !== examClientOrigin) return
+    if (event.data === 'examflow:request-token') {
+      const token = localStorage.getItem('examflow_token') || ''
+      event.source?.postMessage({ type: 'examflow:token', token }, { targetOrigin: event.origin })
+      window.removeEventListener('message', handler)
+    }
+  }
+  window.addEventListener('message', handler)
+  window.setTimeout(() => window.removeEventListener('message', handler), 60_000)
 }
 
 onMounted(load)

@@ -1,9 +1,10 @@
 server:
   port: 8088
 
-# paper-service 地址(生产注册 Nacos 后由服务发现替换)
+# 服务间地址(生产注册 Nacos 后由服务发现替换)
 examflow:
   paper-service-url: ${PAPER_SERVICE_URL:http://127.0.0.1:8084}
+  user-service-url: ${USER_SERVICE_URL:http://127.0.0.1:8082}
 
 spring:
   application:

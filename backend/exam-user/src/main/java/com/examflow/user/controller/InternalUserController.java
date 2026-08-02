@@ -36,8 +36,7 @@ public class InternalUserController {
         if (user == null) {
             return null;
         }
-        return new UserInfo(user.getId(), user.getUsername(), user.getName(),
-                user.getPasswordHash(), user.getStatus(), user.getUserType(), user.getOrgId());
+        return toInfo(user);
     }
 
     /** 指定用户的有效权限码集合(SYS_ADMIN 返回 ["*"],供各服务方法级授权校验)。 */
@@ -71,8 +70,14 @@ public class InternalUserController {
     }
 
     private UserInfo toInfo(SysUser user) {
-        return new UserInfo(user.getId(), user.getUsername(), user.getName(),
-                user.getPasswordHash(), user.getStatus(), user.getUserType(), user.getOrgId());
+        try {
+            return new UserInfo(user.getId(), user.getUsername(), user.getName(),
+                    user.getPasswordHash(), user.getStatus(), user.getUserType(), user.getOrgId(),
+                    user.getPhone() == null ? null : AesUtil.decrypt(user.getPhone()));
+        } catch (Exception e) {
+            return new UserInfo(user.getId(), user.getUsername(), user.getName(),
+                    user.getPasswordHash(), user.getStatus(), user.getUserType(), user.getOrgId(), null);
+        }
     }
 
     private String encrypt(String plain) {
